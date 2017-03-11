@@ -18,14 +18,18 @@
 image_name = 'pumpkins'; % 'train'; % 'cityscape'; % 'forest'; % 
 img_hazy = imread(['images/',image_name,'_input.png']);
 
-% The algorithm uses previous methods for airlight estimation. 
-% Load the airlight and gamma from the param file. 
+% Load the gamma from the param file. 
 % These values were given by Ra'anan Fattal, along with each image:
 % http://www.cs.huji.ac.il/~raananf/projects/dehaze_cl/results/
 fid = fopen(['images/',image_name,'_params.txt'],'r');
 [C] = textscan(fid,'%s %f');
 fclose(fid);
-gamma = C{2}(1); A = zeros(1,1,3); A(1) = C{2}(2); A(2) = C{2}(3); A(3) = C{2}(4);
+gamma = C{2}(1);
+
+% Estimate air-light using our method described in:
+% Air-light Estimation using Haze-Lines. Berman, D. and Treibitz, T. and 
+% Avidan S., ICCP 2017
+A = reshape(estimate_airlight(im2double(img_hazy).^(gamma)),1,1,3);
 
 % Dehaze the image	
 [img_dehazed, trans_refined] = non_local_dehazing(img_hazy, A, gamma );
